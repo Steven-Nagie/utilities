@@ -266,7 +266,6 @@ var _ = { };
         }
       }
     }
-    console.log(obj);
     return obj;
   };
 
@@ -310,7 +309,6 @@ var _ = { };
 
   };
 
-  console.log(_.memoize(_.each()));
 
   // Delays a function for the given number of milliseconds, and then calls
   // it with the arguments supplied.
@@ -326,7 +324,27 @@ var _ = { };
 
 
   // Shuffle an array.
+
+  //As it is, this is working to shuffle an array without deleting anything.
   _.shuffle = function(array) {
+    console.log(array);
+
+    function getRandom(max, min) {
+      min = Math.ceil(min);
+      max = Math.floor(max);
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    var randomNum = 0;
+    var x = 0;
+    for (i = array.length - 1; i > 0; i--) {
+      randomNum = getRandom(i, 0);
+      x = array[i];
+      array[i] = array[randomNum];
+      array[randomNum] = x;
+    }
+    console.log(array);
+    return array;
   };
 
   // Sort the object's values by a criterion produced by an iterator.
@@ -393,11 +411,43 @@ var _ = { };
   // Takes an arbitrary number of arrays and produces an array that contains
   // every item shared between all the passed-in arrays.
   _.intersection = function() {
+    var newArray = [];
+    var count = 1;
+    for (var i = 0; i < arguments[0].length; i++) {
+      for (var j = 1; j < arguments.length; j++) {
+        if (arguments[j].indexOf(arguments[0][i]) !== -1) {
+           count += 1;
+        } else {
+          break;
+        }
+      }
+      if (count === arguments.length) {
+        newArray.push(arguments[0][i]);
+      }
+      count = 1;
+    }
+    return newArray;
   };
 
   // Take the difference between one array and a number of other arrays.
   // Only the elements present in just the first array will remain.
   _.difference = function(array) {
+    var newArray = [];
+    var count = 1;
+    for (var i = 0; i < arguments[0].length; i++) {
+      for (var j = 1; j < arguments.length; j++) {
+        if (arguments[j].indexOf(arguments[0][i]) === -1) {
+          count += 1;
+        } else {
+          break;
+        }
+      }
+      if (count === arguments.length) {
+        newArray.push(arguments[0][i]);
+      }
+      count = 1;
+    }
+    return newArray;
   };
 
 }).call(this);
