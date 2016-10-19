@@ -384,12 +384,18 @@ var _ = { };
   // of that string. For example, _.sortBy(people, 'name') should sort
   // an array of people by their name.
   _.sortBy = function(collection, iterator) {
-
-    var returnValue;
-
-    function compareString(a, b) {
-      return a[iterator] - b[iterator];
+    if (typeof iterator === "string") {
+      var arg = iterator;
+      iterator = function(obj) {
+        return obj[arg];
+      };
     }
+
+    // var returnValue;
+
+    // function compareString(a, b) {
+    //   return a[iterator] - b[iterator];
+    // }
 
     // var x = [];
     // for (var i = collection.length - 1; i >= 0; i--) {
@@ -408,13 +414,9 @@ var _ = { };
         if (iterator(collection[i]) === undefined) {
           unSort.push(collection[i]);
           collection.splice(i, 1);
-        }
-
-        if (iterator(collection[i]) <= iterator(collection[i + 1])) {
+        } else if (iterator(collection[i]) <= iterator(collection[i + 1])) {
           continue;
-        } else if (i === collection.length - 1) {
-          sortFlag = false;
-        }else {
+        } else {
           var rando = collection[i];
           collection[i] = collection[i + 1];
           collection[i + 1] = rando;
@@ -427,18 +429,23 @@ var _ = { };
 
     }
 
+    ownSort(collection);
 
-    if (typeof iterator === "string") {
-      returnValue = collection.sort(compareString);
-    } else if (typeof iterator === "function"){
-      returnValue = collection.sort(ownSort(collection));
-    }
+    unSort.forEach(function(i) {
+      collection.push(i);
+    });
 
-    if (unSort.length > 0) {
-      for (var j = 0; j < unSort.length; j++) {
-        collection.push(unSort[i]);
-      }
-    }
+    // if (typeof iterator === "string") {
+    //   returnValue = collection.sort(compareString);
+    // } else if (typeof iterator === "function"){
+    //   returnValue = collection.sort(ownSort(collection));
+    // }
+
+    // if (unSort.length > 0) {
+    //   for (var j = 0; j < unSort.length; j++) {
+    //     collection.push(unSort[i]);
+    //   }
+    // }
 
     // if (x.length > 0) {
     //   for (var j = 0; j < x.length; j++) {
@@ -446,11 +453,12 @@ var _ = { };
     //   }
     // }
 
-
-    console.log(returnValue);
-    return returnValue;
+    console.log(collection);
+    return collection;
 
   };
+
+
 
   // Zip together two or more arrays with elements of the same index
   // going together.
