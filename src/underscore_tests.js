@@ -147,21 +147,60 @@ console.log(_.uniq([1,2,5,3,5,6,4,2,3,6,7,7,7,4,23,54,6,4,5,1,1,1,1]));
 
   // Calls the method named by methodName on each value in the list.
   _.invoke = function(list, methodName, args) {
+    if (Array.isArray(list)) {
+      for (var i = 0; i < list.length; i++) {
+        methodName(list[i]);
+      }
+    } else {
+      for (var key in list) {
+        methodName(list[key]);
+      }
+    }
   };
 
   // Reduces an array or object to a single value by repetitively calling
   // iterator(previousValue, item) for each item. previousValue should be
   // the return value of the previous iterator call.
   _.reduce = function(collection, iterator, initialValue) {
+    var previousValue = 0;
+    if (!initialValue) {
+      previousValue = 0;
+    } else {
+      previousValue = initialValue;
+    }
+    for (var i = 0; i < collection.length; i++) {
+      previousValue = iterator(previousValue, collection[i]);
+    }
+    return previousValue;
   };
 
   // Determine if the array or object contains a given value (using `===`).
   _.contains = function(collection, target) {
+    for (var i = 0; i < collection.length; i++) {
+      if (collection[i] === target) {
+        return true;
+      }
+    }
+    return false;
   };
 
 
   // Determine whether all of the elements match a truth test.
   _.every = function(collection, iterator) {
+    var arrayTest = [];
+    if (!arguments[1]) {
+      return true;
+    }
+    for (var i = 0; i < collection.length; i++) {
+      if (iterator(collection[i])) {
+        arrayTest.push(i);
+      }
+    }
+    if (arrayTest.length === collection.length) {
+      return true;
+    } else {
+      return false;
+    }
   };
 
   // Determine whether any of the elements pass a truth test. If no iterator is
