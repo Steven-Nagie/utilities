@@ -385,38 +385,34 @@ var _ = { };
   // an array of people by their name.
   _.sortBy = function(collection, iterator) {
 
-    function compareNumbers(a, b) {
-      return a - b;
-    }
-    function compareLength(a, b) {
-      var aLength = a.length;
-      var bLength = b.length;
-      return aLength - bLength;
-    }
-    function compareAge(a, b) {
-      return a.age - b.age;
-    }
-    function compareSorter(sorter, a, b) {
-      return a[sorter] - b[sorter];
-    }
     var returnValue;
-    var sorter;
-    if (typeof iterator === "function") {
-      sorter = iterator();
-      returnValue = collection.sort(compareSorter(sorter));
-    } else if (iterator === "length") {
-    returnValue = collection.sort(compareLength);
-    } else {
-    returnValue = collection.sort(compareNumbers);
+
+    function compareString(a, b) {
+      return a[iterator] - b[iterator];
     }
+
+    var x = [];
+    for (var i = collection.length - 1; i >= 0; i--) {
+      if (!collection[i]) {
+        x.push(collection[i]);
+        collection.splice(i, 1);
+      }
+    }
+
+
+    if (typeof iterator === "string") {
+      returnValue = collection.sort(compareString);
+    } else if (typeof iterator === "function"){
+      returnValue = collection.sort(iterator);
+    }
+
+    for (var j = 0; j < x.length; j++) {
+      returnValue.push(x[j]);
+    }
+
+
     console.log(returnValue);
     return returnValue;
-
-    // if (typeof iterator === "number") {
-    //
-    // returnValue = collection.sort(compareAge);
-    //
-    // }
 
   };
 
