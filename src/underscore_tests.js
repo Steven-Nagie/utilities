@@ -156,7 +156,6 @@ var _ = { };
         list[j] = Array.prototype[methodName].call(list[j], args);
       }
     }
-    console.log(list);
     return list;
   };
 
@@ -246,20 +245,29 @@ var _ = { };
   // Extend a given object with all the properties of the passed in
   // object(s).
   _.extend = function(obj) {
-    var obj2 = {};
-    for (var key in obj) {
-      if (!obj[key]) {
-        continue;
-      } else {
-        obj2[key] = obj[key];
+    for (var i = 1; i < arguments.length; i++) {
+      for (var key in arguments[i]) {
+        obj[key] = arguments[i][key];
       }
     }
-    return obj2;
+
+    return obj;
   };
 
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
   _.defaults = function(obj) {
+    for (var i = 1; i < arguments.length; i++) {
+      for (var key in arguments[i]) {
+        if (obj.hasOwnProperty(key)) {
+          continue;
+        } else {
+          obj[key] = arguments[i][key];
+        }
+      }
+    }
+    console.log(obj);
+    return obj;
   };
 
 
@@ -334,6 +342,15 @@ var _ = { };
   //
   // Example:
   // _.zip(['a','b','c','d'], [1,2,3]) returns [['a',1], ['b',2], ['c',3], ['d',undefined]]
+
+  // _.zip = function() {
+  //   var newArray = [];
+  //   for (var i = 0; i < arguments.length; i++) {
+  //     for (var j = 0; j < arguments[0].length; j++) {
+  //       newArray.push(arguments[i][j]);
+  //     }
+  //   }
+  // };
 
   //Kinda cheated here, since we simply assume that the first argument will be the longest.
   _.zip = function(a, b, c) {
