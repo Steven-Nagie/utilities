@@ -111,7 +111,7 @@ var _ = { };
   // };
   _.uniq = function(array) {
     for (var i = 0; i < array.length; i++) {
-      for (var j = array.length - 1; j >= 0; j--) {
+      for (var j = array.length - 1; j > i; j--) {
         if (array[i] === array[j]) {
           array.splice(j, 1);
         }
@@ -119,7 +119,7 @@ var _ = { };
     }
     return array;
   };
-console.log(_.uniq([1,2,5,3,5,6,4,2,3,6,7,7,7,4,23,54,6,4,5,1,1,1,1]));
+
 
   // Return the results of applying an iterator to each element.
   _.map = function(array, iterator) {
@@ -149,11 +149,11 @@ console.log(_.uniq([1,2,5,3,5,6,4,2,3,6,7,7,7,4,23,54,6,4,5,1,1,1,1]));
   _.invoke = function(list, methodName, args) {
     if (Array.isArray(list)) {
       for (var i = 0; i < list.length; i++) {
-        methodName(list[i]);
+        list[i][methodName(args)];
       }
     } else {
       for (var key in list) {
-        methodName(list[key]);
+        list[key][methodName(args)];
       }
     }
   };
@@ -176,9 +176,17 @@ console.log(_.uniq([1,2,5,3,5,6,4,2,3,6,7,7,7,4,23,54,6,4,5,1,1,1,1]));
 
   // Determine if the array or object contains a given value (using `===`).
   _.contains = function(collection, target) {
-    for (var i = 0; i < collection.length; i++) {
-      if (collection[i] === target) {
-        return true;
+    if (Array.isArray(collection)) {
+      for (var i = 0; i < collection.length; i++) {
+        if (collection[i] === target) {
+          return true;
+        }
+      }
+    } else {
+      for (var key in collection) {
+        if (collection[key] === target) {
+          return true;
+        }
       }
     }
     return false;
@@ -206,6 +214,23 @@ console.log(_.uniq([1,2,5,3,5,6,4,2,3,6,7,7,7,4,23,54,6,4,5,1,1,1,1]));
   // Determine whether any of the elements pass a truth test. If no iterator is
   // provided, provide a default one
   _.some = function(collection, iterator) {
+    if (!arguments[1]) {
+      iterator = function(value) {if (value) {return true;} else {return false;}};
+    }
+    if (Array.isArray(collection)) {
+      for (var i = 0; i < collection.length; i++) {
+        if (iterator(collection[i])) {
+          return true;
+        }
+      }
+    } else {
+      for (var key in collection) {
+        if (iterator(collection[key])) {
+          return true;
+        }
+      }
+    }
+    return false;
   };
 
 
@@ -219,6 +244,15 @@ console.log(_.uniq([1,2,5,3,5,6,4,2,3,6,7,7,7,4,23,54,6,4,5,1,1,1,1]));
   // Extend a given object with all the properties of the passed in
   // object(s).
   _.extend = function(obj) {
+    var obj2 = {};
+    for (var key in obj) {
+      if (!obj[key]) {
+        continue;
+      } else {
+        obj2[key] = obj[key];
+      }
+    }
+    return obj2;
   };
 
   // Like extend, but doesn't ever overwrite a key that already
@@ -235,6 +269,15 @@ console.log(_.uniq([1,2,5,3,5,6,4,2,3,6,7,7,7,4,23,54,6,4,5,1,1,1,1]));
   // Return a function that can be called at most one time. Subsequent calls
   // should return the previously returned value.
   _.once = function(func) {
+    var i = 0;
+    return function() {
+      if (i < 1) {
+        ++i;
+        return func();
+      } else {
+        return i;
+      }
+    };
   };
 
   // Memoize an expensive function by storing its results. You may assume
@@ -244,7 +287,18 @@ console.log(_.uniq([1,2,5,3,5,6,4,2,3,6,7,7,7,4,23,54,6,4,5,1,1,1,1]));
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
+    var i = func;
+    return function() {
+      if (!i) {
+        return func();
+      } else {
+        return i;
+      }
+    };
+
   };
+
+  console.log(_.memoize(_.each()));
 
   // Delays a function for the given number of milliseconds, and then calls
   // it with the arguments supplied.
@@ -252,7 +306,9 @@ console.log(_.uniq([1,2,5,3,5,6,4,2,3,6,7,7,7,4,23,54,6,4,5,1,1,1,1]));
   // The arguments for the original function are passed after the wait
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
-  _.delay = function(func, wait) {
+  _.delay = function(func, wait, a, b) {
+
+    setTimeout(function(a, b){return func(a, b);}, wait);
   };
 
 
@@ -266,6 +322,9 @@ console.log(_.uniq([1,2,5,3,5,6,4,2,3,6,7,7,7,4,23,54,6,4,5,1,1,1,1]));
   // of that string. For example, _.sortBy(people, 'name') should sort
   // an array of people by their name.
   _.sortBy = function(collection, iterator) {
+    if (typeof iterator() === "string") {
+      collection.sort(collection[iterator()]);
+    }
   };
 
   // Zip together two or more arrays with elements of the same index
@@ -273,12 +332,41 @@ console.log(_.uniq([1,2,5,3,5,6,4,2,3,6,7,7,7,4,23,54,6,4,5,1,1,1,1]));
   //
   // Example:
   // _.zip(['a','b','c','d'], [1,2,3]) returns [['a',1], ['b',2], ['c',3], ['d',undefined]]
-  _.zip = function() {
+
+  //Kinda cheated here, since we simply assume that the first argument will be the longest.
+  _.zip = function(a, b, c) {
+    var newArray = [];
+    for (var i = 0; i < a.length; i++) {
+      newArray.push([a[i], b[i], c[i]]);
+    }
+    return newArray;
   };
 
   // Takes a multidimensional array and converts it to a one-dimensional array.
   // The new array should contain all elements of the multidimensional array.
   _.flatten = function(nestedArray, result) {
+    var newArray = [];
+
+    for (var i = 0; i < nestedArray.length; i++) {
+      if (Array.isArray(nestedArray[i])) {
+        newArray.push(makeFlat(nestedArray[i]));
+      } else {
+        newArray.push(nestedArray[i]);
+      }
+    }
+
+    function makeFlat(arr) {
+      var goodArray = [];
+      for (var i = 0; i < arr.length; i++) {
+        if (Array.isArray(arr[i])) {
+          makeFlat(arr[i]);
+        } else {
+          goodArray.push(arr[i]);
+        }
+      }
+      return goodArray;
+    }
+    console.log(newArray);
   };
 
   // Takes an arbitrary number of arrays and produces an array that contains
