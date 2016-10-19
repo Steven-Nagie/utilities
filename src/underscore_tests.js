@@ -391,24 +391,60 @@ var _ = { };
       return a[iterator] - b[iterator];
     }
 
-    var x = [];
-    for (var i = collection.length - 1; i >= 0; i--) {
-      if (!collection[i]) {
-        x.push(collection[i]);
-        collection.splice(i, 1);
+    // var x = [];
+    // for (var i = collection.length - 1; i >= 0; i--) {
+    //   if (!collection[i]) {
+    //     x.push(collection[i]);
+    //     collection.splice(i, 1);
+    //   }
+    // }
+    var unSort = [];
+
+    function ownSort(collection) {
+      var sortFlag = false;
+
+
+      for (var i = 0; i < collection.length - 1; i++) {
+        if (iterator(collection[i]) === undefined) {
+          unSort.push(collection[i]);
+          collection.splice(i, 1);
+        }
+
+        if (iterator(collection[i]) <= iterator(collection[i + 1])) {
+          continue;
+        } else if (i === collection.length - 1) {
+          sortFlag = false;
+        }else {
+          var rando = collection[i];
+          collection[i] = collection[i + 1];
+          collection[i + 1] = rando;
+          sortFlag = true;
+        }
       }
+      if (sortFlag) {ownSort(collection);}
+
+
+
     }
 
 
     if (typeof iterator === "string") {
       returnValue = collection.sort(compareString);
     } else if (typeof iterator === "function"){
-      returnValue = collection.sort(iterator);
+      returnValue = collection.sort(ownSort(collection));
     }
 
-    for (var j = 0; j < x.length; j++) {
-      returnValue.push(x[j]);
+    if (unSort.length > 0) {
+      for (var j = 0; j < unSort.length; j++) {
+        collection.push(unSort[i]);
+      }
     }
+
+    // if (x.length > 0) {
+    //   for (var j = 0; j < x.length; j++) {
+    //     returnValue.push(x[j]);
+    //   }
+    // }
 
 
     console.log(returnValue);
