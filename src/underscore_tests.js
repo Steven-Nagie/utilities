@@ -297,14 +297,15 @@ var _ = { };
   // instead if possible.
   _.memoize = function(func) {
     //Using closures here. Set i equal to the return of the function
-    var i;
+    var i = {};
 
-    return function() {
-      if (i === func) {
-        return i;
+    return function(x) {
+      var j = x;
+      if (i[j]) {
+        return i[j];
       } else {
-        i = func;
-        return func();
+        i[j] = j;
+        return func(x);
       }
     };
 
@@ -383,18 +384,6 @@ var _ = { };
   // of that string. For example, _.sortBy(people, 'name') should sort
   // an array of people by their name.
   _.sortBy = function(collection, iterator) {
-    // var sorter = iterator;
-    // if (typeof sorter === "string") {
-    //   collection.sort(collection[sorter]);
-    // } else {
-    //   collection.sort(sorter);
-    // }
-    // return collection;
-
-
-    // if (iterator === "age") {
-    //   return collection[iterator].sort.call(collection, function(a, b) {return a - b;});
-    // }
 
     function compareNumbers(a, b) {
       return a - b;
@@ -407,37 +396,27 @@ var _ = { };
     function compareAge(a, b) {
       return a.age - b.age;
     }
+    function compareSorter(sorter, a, b) {
+      return a[sorter] - b[sorter];
+    }
     var returnValue;
-    if (iterator === "age") {
-    // returnValue = collection.sort(function(a, b) {
-    //   if (a.age > b.age) {
-    //     return 1;
-    //   }
-    //   if (a.age < b.age) {
-    //     return -1;
-    //   }
-    //
-    //   return 0;
-  // });
-    returnValue = collection.sort(compareAge);
-
-    // var returnArr = [];
-    // for (var i = 0; i < collection.length; i++) {
-    //   returnValue = collection[i].sort(compareAge);
-    // }
-    // // collection = collection.sort(compareAge);
-    // // for (var key in collection) {
-    // //   if (key === "name") {
-    // //     returnArr.push(collection[key]);
-    // //   }
-    // // }
-    // // returnValue = returnArr;
-  } else if (iterator === "length") {
+    var sorter;
+    if (typeof iterator === "function") {
+      sorter = iterator();
+      returnValue = collection.sort(compareSorter(sorter));
+    } else if (iterator === "length") {
     returnValue = collection.sort(compareLength);
-  } else {
+    } else {
     returnValue = collection.sort(compareNumbers);
-  }
+    }
     console.log(returnValue);
+    return returnValue;
+
+    // if (typeof iterator === "number") {
+    //
+    // returnValue = collection.sort(compareAge);
+    //
+    // }
 
   };
 
