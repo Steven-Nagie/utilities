@@ -296,16 +296,41 @@ var _ = { };
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
-    var i = {};
-    var j = 0;
+    //Using closures here. Set i equal to the return of the function
+    var i;
+
     return function() {
-      if (!i) {
-        i.j = func();
-        return func();
+      if (i === func) {
+        return i;
       } else {
-        return i.j;
+        i = func;
+        return func();
       }
     };
+
+    // function returnI() {
+    //   i = func();
+    //   return func();
+    // }
+    //
+    // if (i === func) {
+    //   console.log(i);
+    //   return i;
+    // } else {
+    //   console.log(i);
+    //   return returnI();
+    // }
+
+    // var i = {};
+    // var j = 0;
+    // return function() {
+    //   if (!i) {
+    //     i.j = func();
+    //     return func();
+    //   } else {
+    //     return i.j;
+    //   }
+    // };
 
   };
 
@@ -328,6 +353,11 @@ var _ = { };
   //As it is, this is working to shuffle an array without deleting anything.
   _.shuffle = function(array) {
     console.log(array);
+    var newArray = [];
+
+    for (var i = 0; i < array.length; i++) {
+      newArray.push(array[i]);
+    }
 
     function getRandom(max, min) {
       min = Math.ceil(min);
@@ -337,14 +367,15 @@ var _ = { };
 
     var randomNum = 0;
     var x = 0;
-    for (i = array.length - 1; i > 0; i--) {
+    for (i = newArray.length - 1; i > 0; i--) {
       randomNum = getRandom(i, 0);
-      x = array[i];
-      array[i] = array[randomNum];
-      array[randomNum] = x;
+      x = newArray[i];
+      newArray[i] = newArray[randomNum];
+      newArray[randomNum] = x;
     }
     console.log(array);
-    return array;
+    return newArray;
+
   };
 
   // Sort the object's values by a criterion produced by an iterator.
@@ -352,13 +383,62 @@ var _ = { };
   // of that string. For example, _.sortBy(people, 'name') should sort
   // an array of people by their name.
   _.sortBy = function(collection, iterator) {
-    var sorter = iterator;
-    if (typeof sorter === "string") {
-      collection.sort(collection[sorter]);
-    } else {
-      collection.sort(sorter);
+    // var sorter = iterator;
+    // if (typeof sorter === "string") {
+    //   collection.sort(collection[sorter]);
+    // } else {
+    //   collection.sort(sorter);
+    // }
+    // return collection;
+
+
+    // if (iterator === "age") {
+    //   return collection[iterator].sort.call(collection, function(a, b) {return a - b;});
+    // }
+
+    function compareNumbers(a, b) {
+      return a - b;
     }
-    return collection;
+    function compareLength(a, b) {
+      var aLength = a.length;
+      var bLength = b.length;
+      return aLength - bLength;
+    }
+    function compareAge(a, b) {
+      return a.age - b.age;
+    }
+    var returnValue;
+    if (iterator === "age") {
+    // returnValue = collection.sort(function(a, b) {
+    //   if (a.age > b.age) {
+    //     return 1;
+    //   }
+    //   if (a.age < b.age) {
+    //     return -1;
+    //   }
+    //
+    //   return 0;
+  // });
+    returnValue = collection.sort(compareAge);
+
+    // var returnArr = [];
+    // for (var i = 0; i < collection.length; i++) {
+    //   returnValue = collection[i].sort(compareAge);
+    // }
+    // // collection = collection.sort(compareAge);
+    // // for (var key in collection) {
+    // //   if (key === "name") {
+    // //     returnArr.push(collection[key]);
+    // //   }
+    // // }
+    // // returnValue = returnArr;
+  } else if (iterator === "length") {
+    returnValue = collection.sort(compareLength);
+  } else {
+    returnValue = collection.sort(compareNumbers);
+  }
+    console.log(returnValue);
+
   };
 
   // Zip together two or more arrays with elements of the same index
@@ -379,6 +459,7 @@ var _ = { };
   //Kinda cheated here, since we simply assume that the first argument will be the longest.
   _.zip = function(a, b, c) {
     var newArray = [];
+
     for (var i = 0; i < a.length; i++) {
       newArray.push([a[i], b[i], c[i]]);
     }
@@ -388,29 +469,24 @@ var _ = { };
   // Takes a multidimensional array and converts it to a one-dimensional array.
   // The new array should contain all elements of the multidimensional array.
   _.flatten = function(nestedArray, result) {
-    var newArray = [];
 
-    for (var i = 0; i < nestedArray.length; i++) {
-      if (Array.isArray(nestedArray[i])) {
-        newArray.push(makeFlat(nestedArray[i]));
-      } else {
-        newArray.push(nestedArray[i]);
-      }
-    }
+    var merged = [];
+    function pushArray(arr, merged) {
 
-    function makeFlat(arr) {
-      var goodArray = [];
       for (var i = 0; i < arr.length; i++) {
-        if (Array.isArray(arr[i])) {
-          makeFlat(arr[i]);
+        if (!Array.isArray(arr[i])) {
+          merged.push(arr[i]);
         } else {
-          goodArray.push(arr[i]);
+          pushArray(arr[i], merged);
         }
       }
-      return goodArray;
+      return merged;
     }
-    console.log(newArray);
+    var answer = pushArray(nestedArray, merged);
+    return answer;
+
   };
+
 
   // Takes an arbitrary number of arrays and produces an array that contains
   // every item shared between all the passed-in arrays.
