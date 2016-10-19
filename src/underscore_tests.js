@@ -297,12 +297,14 @@ var _ = { };
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
-    var i = func;
+    var i = {};
+    var j = 0;
     return function() {
       if (!i) {
+        i.j = func();
         return func();
       } else {
-        return i;
+        return i.j;
       }
     };
 
@@ -317,8 +319,8 @@ var _ = { };
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
   _.delay = function(func, wait, a, b) {
-
-    setTimeout(function(a, b){return func(a, b);}, wait);
+    function automatic(){return func(a,b);}
+    setTimeout(automatic, wait);
   };
 
 
